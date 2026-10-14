@@ -22,7 +22,7 @@ The README links a Google Doc with the team notes; as of 2026-10 it returns
 |---|---|
 | `src/ntxbci/game/` | One-row Pacman rewritten from the hackathon's modified CharlesPikachu/Games `Game14` (see `assets/NOTICE.md`): pure rules in `model.py`, pygame in `render.py`/`app.py`, keyboard + scripted (blink replay) controllers. The legacy `pacman/` folder was removed. |
 | `Recordings/` | All raw recordings (unmodified): evening EEG sessions 2–5, `stimulus_order.txt`, and `BlinkTest_2022-10-30/` (the only labelled recording). The former `data/` tree was a byte-identical duplicate and was removed. |
-| `get_dynamic_spectrum.ipynb` | Multitaper dynamic spectrum + AR whitening. Loads `ws_data_1shank.mat` (16-ch hippocampal LFP @1250 Hz) — workshop sample data, **not in the repo and not our EEG**. Never applied to the Ganglion data. |
+| `notebooks/dynamic_spectrum.ipynb` | Runnable successor of the hackathon's `get_dynamic_spectrum.ipynb` (removed): applies `ntxbci.spectral` (multitaper + AR whitening, ported from labbox `mtcsd`) to our recordings. The original loaded a course dataset (`ws_data_1shank.mat`, LMU 'Machine Learning and Analysis of Neural Data' 2022) that was never in the repo. Executed by `tests/integration/test_notebook.py`. |
 
 ## Data formats
 
