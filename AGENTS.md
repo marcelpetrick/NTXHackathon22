@@ -56,7 +56,7 @@ open questions about the protocol are in issue #1.
 ```bash
 uv sync --all-extras                 # setup
 ./localPipeline.sh                   # THE gate (CI runs exactly this); --fast skips e2e+docker
-scripts/commit.sh patch "type(scope): msg"   # bump -> pipeline -> commit -> push
+scripts/commit.sh patch "type(scope): msg" -- new/file.py   # bump -> pipeline -> commit -> push
 uv run ntxbci replay blink-test      # end-to-end regression check
 uv run python scripts/screenshots.py # refresh README screenshots after UI changes
 ```

@@ -7,7 +7,7 @@ and a usage line; `scripts/check_script_docs.sh` enforces that each one is liste
 |---|---|
 | `bump_version.sh` | Bump `patch`/`minor`/`major` in `pyproject.toml` and refresh `uv.lock`. |
 | `version.sh` | Print the current version. |
-| `commit.sh` | Bump version → run `./localPipeline.sh` → commit with a conventional message → push. Commits nothing if the pipeline is red. |
+| `commit.sh` | Bump version → run `./localPipeline.sh` → commit with a conventional message → push. Stages tracked changes plus the new paths named after `--`; refuses on any other untracked file and commits nothing if the pipeline is red. |
 | `check_headers.sh` | Fail if a `.py`/`.sh`/`Dockerfile` lacks an SPDX license header. |
 | `check_script_docs.sh` | Fail if a script has no purpose line or is missing from this table. |
 | `build_dist.sh` | Build sdist + wheel into `dist/`. |
