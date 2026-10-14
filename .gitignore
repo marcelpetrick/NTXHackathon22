@@ -1,5 +1,24 @@
-venv
-.idea
-venv
-DS_Store
-__pycache__
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.ipynb_checkpoints/
+
+# Pipeline output
+pipeline-reports/
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
+._*
