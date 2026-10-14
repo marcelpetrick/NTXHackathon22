@@ -45,6 +45,10 @@ peaks were, so nothing could be trained.
 - The Pacman game working again: keyboard control and a BCI mode in which blinks
   (replayed from a recording) steer Pacman.
 - A runnable notebook that uses the library on our data.
+- An automatable **replay check**: feed an existing recording through the analyzer
+  into a headless game and verify the outcome (detected blinks vs. ground truth,
+  Pacman reacting at the right moments). Reusable in CI and as the e2e baseline for
+  continuing where the hackathon stopped.
 
 ### V6 — Engineering
 - `localPipeline.sh`: format, lint, type check, unit + integration + e2e tests,
