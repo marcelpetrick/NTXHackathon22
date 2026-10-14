@@ -21,8 +21,7 @@ The README links a Google Doc with the team notes; as of 2026-10 it returns
 | Path | Content |
 |---|---|
 | `pacman/` | Pygame Pacman (third-party original, commit `417418c`), reduced to a single-row level 606×86 px (`f374c4a`). Keyboard only, no BCI input. |
-| `Recordings/` | Evening EEG sessions 2–5 + `stimulus_order.txt`. |
-| `data/` | Byte-identical copy of `Recordings/OpenBCISession_session{2..5}` (session2 without the `_possibly_mislabeled` suffix) **plus** the only labelled recording, the blink file. |
+| `Recordings/` | All raw recordings (unmodified): evening EEG sessions 2–5, `stimulus_order.txt`, and `BlinkTest_2022-10-30/` (the only labelled recording). The former `data/` tree was a byte-identical duplicate and was removed. |
 | `get_dynamic_spectrum.ipynb` | Multitaper dynamic spectrum + AR whitening. Loads `ws_data_1shank.mat` (16-ch hippocampal LFP @1250 Hz) — workshop sample data, **not in the repo and not our EEG**. Never applied to the Ganglion data. |
 
 ## Data formats
@@ -32,9 +31,8 @@ The README links a Google Doc with the team notes; as of 2026-10 it returns
   `5–7` accelerometer X/Y/Z (Z ≈ 1 g; **not markers**), `8–12` "Other" (zero),
   `13` unix timestamp, `14` other, `15` formatted timestamp.
 - `BrainFlow-RAW_*.csv` — BrainFlow export, tab separated, same column order, no header.
-- `data/blinking…csv/…csv_0.cw` — BrainFlow format but with **comma as decimal
+- `Recordings/BlinkTest_2022-10-30/…csv_0.cw` — BrainFlow format but with **comma as decimal
   separator** (German locale) and every sample index appearing twice.
-- `Recordings/…session2…/._OpenBCI-RAW…txt` and `.DS_Store` are macOS metadata junk.
 
 ## What each recording actually is (reconstructed 2026-10-14)
 
@@ -71,8 +69,4 @@ No dependency manifest exists. Inferred: Python 3.8, `pygame` (game),
 
 - Raw recordings are the historical record: **do not modify, reformat or delete** them.
   Write derived data/scripts elsewhere.
-- `data/` and `Recordings/` duplicate each other; if de-duplicating, keep
-  `Recordings/` and move the blink file there.
-- `pacman/__pycache__/` and `.DS_Store` are committed despite `.gitignore`; safe to
-  `git rm --cached`.
 - Code style in `pacman/`: tabs, `'''docstring'''` comments above functions.
