@@ -11,7 +11,15 @@
 `ntxbci` is the cleaned-up result of our [NeuroTechX Hackathon 2022](https://web.archive.org/web/20220919091253/https://neurotechx.com/hackathon2022/)
 project (29/30 October 2022). We recorded EEG with an **OpenBCI Ganglion** (4 channels, 200 Hz)
 to steer a one-row **Pacman** with blinks, and stopped with raw files nobody could explain
-any more. This repository turns those leftovers into a working toolkit:
+any more. This repository turns those leftovers into a working toolkit.
+
+[![29 s explainer: the real 2022 EEG recording next to the game; every detected blink flies from its spike to Pacman and turns it around](docs/media/ntxbci-explainer.gif)](docs/media/ntxbci-explainer.mp4)
+
+*The real blink-test recording from 2022, replayed: each blink in the EEG (left) becomes one
+command for Pacman (right). Click for the full-resolution MP4; rendered by
+[`scripts/make_video.py`](scripts/make_video.py).*
+
+What is in here:
 
 - a verified **manifest** that explains every recording (the "mystery" solved, see below),
 - **loaders** for all three Ganglion export formats, **filtering**, **quality** metrics,
