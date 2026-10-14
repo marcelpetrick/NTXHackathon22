@@ -11,7 +11,7 @@ from pathlib import Path
 import pygame
 
 from ntxbci.game.controllers import Controller, KeyboardController
-from ntxbci.game.model import TICK_S, Command, GameState, Status
+from ntxbci.game.model import TICK_S, TIME_LIMIT_S, Command, GameState, Status
 from ntxbci.game.render import HEIGHT, WIDTH, Renderer, asset_path
 
 KEYS = {
@@ -31,6 +31,8 @@ class RunOptions:
     caption: str = ""
     headless: bool = False
     """Use SDL's dummy video driver (CI, docker, tests)."""
+    time_limit_s: float = TIME_LIMIT_S
+    """Survive this long to win."""
 
 
 DEFAULT_OPTIONS = RunOptions()
@@ -47,6 +49,7 @@ def run(controller: Controller, options: RunOptions = DEFAULT_OPTIONS) -> GameSt
         pygame.display.set_icon(pygame.image.load(str(asset_path("icon.png"))))
         renderer = Renderer(screen)
         state = GameState()
+        state.time_limit_s = options.time_limit_s
         clock = pygame.time.Clock()
         keyboard = controller if isinstance(controller, KeyboardController) else None
         ticks = round(options.max_seconds / TICK_S)

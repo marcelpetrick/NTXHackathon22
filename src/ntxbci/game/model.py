@@ -6,8 +6,12 @@ The corridor has ``CELLS`` cells. Pacman always moves in its current direction a
 ``HERO_SPEED`` cells/s and stops at the walls; the only control needed is *reverse* -
 a single bit, which is what one blink provides. Dots fill the corridor, power pellets sit
 at both ends. Ghosts patrol back and forth; touching one costs a life unless a pellet
-made them frightened, in which case the ghost is eaten and respawns. All dots eaten: won.
-No lives left: lost.
+made them frightened, in which case the ghost is eaten and returns to the ghost house.
+Like in the arcade, ghosts wait in the house before their release time, and after being
+caught Pacman respawns in the middle (keeping its direction) with a short invulnerability.
+Eating all dots starts the next round (dots and pellets refill, ghosts get faster).
+Surviving until ``time_limit_s``: won. No lives left: lost. With no direction yet, a
+reverse starts Pacman away from the nearest ghost.
 """
 
 from __future__ import annotations
@@ -17,10 +21,15 @@ from enum import Enum
 
 CELLS = 20
 HERO_SPEED = 2.0
-GHOST_SPEED = 1.0
+GHOST_SPEED = 0.6  # tuned so ~5 s blink cadence is playable (see tests)
 FRIGHT_S = 6.0
 LIVES = 3
 TICK_S = 0.1
+RESPAWN_GRACE_S = 2.0
+HOUSE_S = 3.0
+TIME_LIMIT_S = 60.0
+ROUND_SPEEDUP = 0.15
+ROUND_POINTS = 500
 DOT_POINTS = 10
 PELLET_POINTS = 50
 GHOST_POINTS = 200
@@ -47,6 +56,11 @@ class Ghost:
     direction: int
     home: float
     eaten_count: int = 0
+    release_s: float = 0.0
+    """Game time at which the ghost leaves the house."""
+
+    def active(self, time_s: float) -> bool:
+        return time_s >= self.release_s
 
 
 @dataclass(frozen=True)
@@ -56,19 +70,30 @@ class LogEntry:
     x: float
 
 
+def _all_dots() -> set[int]:
+    return set(range(1, CELLS - 1))
+
+
+def _all_pellets() -> set[int]:
+    return {0, CELLS - 1}
+
+
 @dataclass
 class GameState:
     hero_x: float = CELLS / 2
-    direction: int = 1
-    dots: set[int] = field(default_factory=lambda: set(range(1, CELLS - 1)))
-    pellets: set[int] = field(default_factory=lambda: {0, CELLS - 1})
+    direction: int = 0
+    dots: set[int] = field(default_factory=_all_dots)
+    pellets: set[int] = field(default_factory=_all_pellets)
     ghosts: list[Ghost] = field(
-        default_factory=lambda: [Ghost("Blinky", 2.0, 1, 2.0), Ghost("Clyde", 17.0, -1, 17.0)]
+        default_factory=lambda: [Ghost("Blinky", 2.0, 1, 2.0, release_s=8.0)]
     )
     score: int = 0
     lives: int = LIVES
     fright_left_s: float = 0.0
+    grace_left_s: float = 0.0
     time_s: float = 0.0
+    time_limit_s: float = TIME_LIMIT_S
+    round: int = 1
     status: Status = Status.RUNNING
     log: list[LogEntry] = field(default_factory=list)
 
@@ -88,21 +113,40 @@ class GameState:
             return
         new = {Command.LEFT: -1, Command.RIGHT: 1, Command.REVERSE: -self.direction}[command]
         if command is Command.REVERSE and self.direction == 0:
-            new = 1 if self.hero_x < CELLS / 2 else -1
+            new = self._away_from_nearest_ghost()
         if new != self.direction:
             self.direction = new
             self._event(f"turn:{'left' if new < 0 else 'right'}")
+
+    def _away_from_nearest_ghost(self) -> int:
+        active = [g for g in self.ghosts if g.active(self.time_s)]
+        if not active:
+            return 1 if self.hero_x < CELLS / 2 else -1
+        nearest = min(active, key=lambda g: abs(g.x - self.hero_x))
+        return 1 if nearest.x <= self.hero_x else -1
+
+    @property
+    def ghost_speed(self) -> float:
+        return GHOST_SPEED * (1 + ROUND_SPEEDUP * (self.round - 1))
 
     def step(self, dt: float = TICK_S) -> None:
         if self.status is not Status.RUNNING:
             return
         self.time_s += dt
         self.fright_left_s = max(0.0, self.fright_left_s - dt)
+        self.grace_left_s = max(0.0, self.grace_left_s - dt)
         self._move_hero(dt)
         self._eat()
         self._move_ghosts(dt)
         self._collide()
-        if not self.dots and self.status is Status.RUNNING:
+        if self.status is not Status.RUNNING:
+            return
+        if not self.dots:
+            self.round += 1
+            self.score += ROUND_POINTS
+            self.dots, self.pellets = _all_dots(), _all_pellets()
+            self._event(f"round:{self.round}")
+        if self.time_s >= self.time_limit_s - 1e-9:
             self.status = Status.WON
             self._event("won")
 
@@ -122,26 +166,33 @@ class GameState:
 
     def _move_ghosts(self, dt: float) -> None:
         for g in self.ghosts:
-            g.x += g.direction * GHOST_SPEED * dt
+            if not g.active(self.time_s):
+                continue
+            g.x += g.direction * self.ghost_speed * dt
             if g.x <= 0 or g.x >= CELLS - 1:
                 g.x = min(CELLS - 1.0, max(0.0, g.x))
                 g.direction = -g.direction
 
+    def _send_home(self, ghost: Ghost) -> None:
+        ghost.x = ghost.home
+        ghost.release_s = self.time_s + HOUSE_S
+
     def _collide(self) -> None:
         for g in self.ghosts:
-            if abs(g.x - self.hero_x) >= _HIT_DISTANCE:
+            if not g.active(self.time_s) or abs(g.x - self.hero_x) >= _HIT_DISTANCE:
                 continue
             if self.frightened:
                 self.score += GHOST_POINTS
                 g.eaten_count += 1
-                g.x = g.home
+                self._send_home(g)
                 self._event(f"ate:{g.name}")
-            else:
+            elif self.grace_left_s == 0:
                 self.lives -= 1
                 self._event(f"caught:{g.name}")
-                self.hero_x, self.direction = CELLS / 2, 0
+                self.hero_x = CELLS / 2
+                self.grace_left_s = RESPAWN_GRACE_S
                 for other in self.ghosts:
-                    other.x = other.home
+                    self._send_home(other)
                 if self.lives <= 0:
                     self.status = Status.LOST
                     self._event("lost")

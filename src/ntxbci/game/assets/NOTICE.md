@@ -1,6 +1,6 @@
 # Game assets
 
-`pacman.png`, `Blinky.png`, `Clyde.png` and `icon.png` come from the Pacman game in
+`pacman.png`, `Blinky.png` and `icon.png` come from the Pacman game in
 [CharlesPikachu/Games](https://github.com/CharlesPikachu/Games/tree/6bedffa54a/Game14)
 (folder `Game14/`), which the hackathon team imported in 2022 (commit `417418c`).
 That code was published under the MIT License (2019) and the repository is licensed

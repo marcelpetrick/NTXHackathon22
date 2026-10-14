@@ -21,9 +21,9 @@ def _opts(**kw: object) -> app.RunOptions:
 
 def test_scripted_run_and_screenshot(tmp_path: Path) -> None:
     shot = tmp_path / "shots" / "game.png"
-    state = app.run(ScriptedController([1.0]), _opts(screenshot=shot, caption="replay"))
+    state = app.run(ScriptedController([1.0, 2.0]), _opts(screenshot=shot, caption="replay"))
     assert state.time_s == pytest.approx(3.0)
-    assert [e.event for e in state.log] == ["turn:left"]
+    assert [e.event for e in state.log] == ["turn:left", "turn:right"]
     image = pygame.image.load(str(shot))
     assert image.get_size() == (WIDTH, HEIGHT)
 
@@ -57,6 +57,11 @@ def test_window_close_and_game_over_screen(monkeypatch: pytest.MonkeyPatch) -> N
 
 def _losing_state() -> GameState:
     return GameState(hero_x=5.0, direction=-1, lives=1, ghosts=[Ghost("Clyde", 4.6, 1, 4.6)])
+
+
+def test_won_screen() -> None:
+    state = app.run(ScriptedController([0.0]), _opts(max_seconds=1.0, time_limit_s=0.5))
+    assert state.status is Status.WON
 
 
 def test_frightened_rendering(monkeypatch: pytest.MonkeyPatch) -> None:

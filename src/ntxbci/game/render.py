@@ -38,7 +38,7 @@ class Renderer:
         self.font = pygame.font.Font(None, 22)
         self.big_font = pygame.font.Font(None, 30)
         self.hero = self._sprite("pacman.png")
-        self.ghosts = {n: self._sprite(f"{n}.png") for n in ("Blinky", "Clyde")}
+        self.ghosts = {n: self._sprite(f"{n}.png") for n in ("Blinky",)}
 
     @staticmethod
     def _sprite(name: str) -> pygame.Surface:
