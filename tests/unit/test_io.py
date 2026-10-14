@@ -91,3 +91,10 @@ def test_stimulus_order(tmp_path: Path) -> None:
     path.write_text("1 2", encoding="utf-8")
     with pytest.raises(io.FormatError):
         io.load_stimulus_order(path)
+
+
+def test_blank_lines_are_skipped(tmp_path: Path) -> None:
+    row = "\t".join(str(v) for v in [0.0, 1, 2, 3, 4, 0, 0, 1, 0, 0, 0, 0, 0, T0, 0])
+    path = tmp_path / "b.csv"
+    path.write_text(f"{row}\n\n{row}\n", encoding="utf-8")
+    assert io.load_recording(path).n_samples == 2
