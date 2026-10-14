@@ -1,11 +1,13 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-# Build the docker image, smoke-test it and publish it to GHCR.
+# Build the docker image, smoke-test it and publish it to GHCR - only for commits on main
+# whose Local Pipeline run succeeded (or on manual dispatch).
 name: Docker Publish
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Local Pipeline"]
+    types: [completed]
     branches: [main]
-    tags: ["v*"]
   workflow_dispatch:
 
 permissions:
@@ -17,12 +19,21 @@ env:
 
 jobs:
   docker:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          # exactly the commit the green pipeline ran on
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - name: Read version
         id: version
-        run: echo "version=$(scripts/version.sh)" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "version=$(scripts/version.sh)" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse --short=7 HEAD)" >> "$GITHUB_OUTPUT"
       - uses: docker/setup-buildx-action@v3
       - name: Build
         uses: docker/build-push-action@v6
@@ -41,7 +52,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Push
         run: |
-          for tag in latest "${{ steps.version.outputs.version }}" "sha-${GITHUB_SHA::7}"; do
+          for tag in latest "${{ steps.version.outputs.version }}" "sha-${{ steps.version.outputs.sha }}"; do
             docker tag ntxbci:local "$IMAGE:$tag"
             docker push "$IMAGE:$tag"
           done

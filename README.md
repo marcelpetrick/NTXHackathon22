@@ -127,7 +127,7 @@ scripts/run_e2e.sh            # Playwright (Chromium) + installed entry point
 | docker | image build + smoke test |
 
 GitHub Actions run exactly `./localPipeline.sh` ([Local Pipeline](.github/workflows/local-pipeline.yml));
-[Docker Publish](.github/workflows/docker-publish.yml) builds, smoke-tests and pushes
+[Docker Publish](.github/workflows/docker-publish.yml) runs only after a green Local Pipeline on `main`; it builds that exact commit, smoke-tests it and pushes
 `latest`, `<version>` and `sha-<commit>` to GHCR.
 
 ## Development workflow
