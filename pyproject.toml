@@ -1,6 +1,6 @@
 [project]
 name = "ntxbci"
-version = "0.1.1"
+version = "0.2.0"
 description = "Cleaned-up NTX Hackathon 2022 BCI toolkit: OpenBCI Ganglion recordings, blink detection, epoching, web dashboard and a blink-controlled Pacman."
 readme = "README.md"
 license = "GPL-3.0-or-later"
@@ -53,6 +53,7 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["tests"]
 addopts = "-ra --strict-markers"
 markers = [
     "e2e: end-to-end tests (browser, game replay, docker-free)",

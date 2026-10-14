@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "device": "OpenBCI Ganglion (BLE), 4 EXG channels, 200 Hz",
+  "timezone": "+02:00",
+  "notes": [
+    "Reconstructed on 2026-10-14 from file contents and timestamps; the team's Google Doc with the protocol is gone (HTTP 410).",
+    "No recording contains event markers: the BrainFlow marker channel (column 14) is all zero; the non-zero aux columns 5-7 are the accelerometer.",
+    "Impedance values are electrode + driven ground in kOhm; the OpenBCI GUI shows half of it per electrode.",
+    "stimulus_order.txt lists 14 binary stimuli without timing; which session(s) it belongs to and what 0/1 mean is unknown.",
+    "Each BrainFlow-RAW_session<N>_1.csv in sessions 2-4 is an impedance check taken right BEFORE session N+1, i.e. misfiled one folder early.",
+    "Afternoon test runs (14:06-16:10) were removed in commit f1374da; their channel std was 5-14 mV (bad contact). Recover with: git show f1374da^:<path>."
+  ],
+  "stimulus_order": "stimulus_order.txt",
+  "recordings": [
+    {
+      "id": "session2",
+      "kind": "eeg",
+      "path": "OpenBCISession_session2_possibly_mislabeled/OpenBCI-RAW-2022-10-29_20-35-18.txt",
+      "start": "2022-10-29T20:35:18.800+02:00",
+      "duration_s": 174.94,
+      "notes": "Folder says 'possibly mislabeled': the EEG itself is fine; the impedance file next to it belongs to session3. Large artefacts near 67, 109 and 128 s."
+    },
+    {
+      "id": "impedance-before-session3",
+      "kind": "impedance",
+      "path": "OpenBCISession_session2_possibly_mislabeled/BrainFlow-RAW_session2_1.csv",
+      "start": "2022-10-29T20:39:36.991+02:00",
+      "impedance_for": "session3",
+      "notes": "Taken 9 s before session3 started."
+    },
+    {
+      "id": "session3",
+      "kind": "eeg",
+      "path": "OpenBCISession_session3/OpenBCI-RAW-2022-10-29_20-39-45.txt",
+      "start": "2022-10-29T20:39:45.379+02:00",
+      "duration_s": 166.75,
+      "notes": "Artefacts 17-20 s."
+    },
+    {
+      "id": "impedance-before-session4",
+      "kind": "impedance",
+      "path": "OpenBCISession_session3/BrainFlow-RAW_session3_1.csv",
+      "start": "2022-10-29T20:45:50.109+02:00",
+      "impedance_for": "session4",
+      "notes": "Taken 11 s before session4 started."
+    },
+    {
+      "id": "session4",
+      "kind": "eeg",
+      "path": "OpenBCISession_session4/OpenBCI-RAW-2022-10-29_20-46-01.txt",
+      "start": "2022-10-29T20:46:01.347+02:00",
+      "duration_s": 169.75,
+      "notes": "Weak ~12 s periodicity in the artefact envelope (14 x 12 s would match stimulus_order.txt) - a hypothesis, not ground truth."
+    },
+    {
+      "id": "impedance-before-session5",
+      "kind": "impedance",
+      "path": "OpenBCISession_session4/BrainFlow-RAW_session4_1.csv",
+      "start": "2022-10-29T20:49:13.538+02:00",
+      "impedance_for": "session5",
+      "notes": "Taken 20 s before session5 started."
+    },
+    {
+      "id": "session5",
+      "kind": "eeg",
+      "path": "OpenBCISession_session5/OpenBCI-RAW-2022-10-29_20-49-33.txt",
+      "start": "2022-10-29T20:49:33.509+02:00",
+      "duration_s": 174.96,
+      "notes": "Artefacts near 88 and 123-125 s."
+    },
+    {
+      "id": "session5-brainflow",
+      "kind": "eeg",
+      "path": "OpenBCISession_session5/BrainFlow-RAW_session5_1.csv",
+      "start": "2022-10-29T20:49:33.509+02:00",
+      "duration_s": 174.97,
+      "duplicate_of": "session5",
+      "notes": "BrainFlow file of the same stream as the GUI export (2 extra samples)."
+    },
+    {
+      "id": "blink-test",
+      "kind": "blink_test",
+      "path": "BlinkTest_2022-10-30/BrainFlow-RAW_blinking_10sbreak_thenevery5secondsblink.csv_0.cw",
+      "start": "2022-10-30T12:45:22.786+02:00",
+      "duration_s": 57.78,
+      "events": {
+        "label": "blink",
+        "times_s": [10, 15, 20, 25, 30, 35, 40, 45, 50, 55],
+        "tolerance_s": 1.5
+      },
+      "notes": "Protocol from the file name: no blink for 10 s, then one blink every 5 s (self-paced, hence the tolerance). The only recording with known events. German-locale export (comma decimals)."
+    }
+  ]
+}
