@@ -144,7 +144,7 @@ Work happens on `main` with atomic [conventional commits](https://www.convention
 every commit bumps the [semver](https://semver.org/) patch version, a major feature bumps the minor.
 [`scripts/commit.sh`](scripts/README.md) does bump → full pipeline → commit → push and refuses
 to commit when anything is red. All helper scripts are documented in [`scripts/README.md`](scripts/README.md);
-guidance for AI agents is in [`AGENTS.md`](AGENTS.md), the goals in [`visions.md`](visions.md).
+guidance for AI agents is in [`AGENTS.md`](AGENTS.md), the goals in [`docs/visions.md`](docs/visions.md).
 
 ```
 src/ntxbci/      io, manifest, processing, events, epochs, spectral, replay, cli
