@@ -1,15 +1,16 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Marcel Petrick <mail@marcelpetrick.it>
-"""Matplotlib figures rendered to PNG bytes (Agg backend, no display needed)."""
+"""Matplotlib figures rendered to PNG bytes (Agg, no display needed).
+
+FastAPI runs the sync plot endpoints in a threadpool and browsers fetch the PNGs in
+parallel, so this module never touches pyplot's global state: every call builds its own
+:class:`~matplotlib.figure.Figure`, which is safe to render concurrently.
+"""
 
 from __future__ import annotations
 
 import io
 
-import matplotlib as mpl
-
-mpl.use("Agg")
-import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
@@ -29,7 +30,6 @@ _CHANNEL_COLOURS = ("#1c7ed6", "#7048e8", "#0ca678", "#f08c00")
 def _png(fig: Figure) -> bytes:
     buf = io.BytesIO()
     fig.savefig(buf, format="png", dpi=100, bbox_inches="tight")
-    plt.close(fig)
     return buf.getvalue()
 
 
@@ -46,7 +46,8 @@ def traces(a: Analysis) -> bytes:
     x = clean(rec)
     t = rec.times
     body = t >= DEFAULT_PARAMS.settle_s  # scale without the amplifier start-up transient
-    fig, axes = plt.subplots(4, 1, figsize=(11, 5.2), sharex=True)
+    fig = Figure(figsize=(11, 5.2))
+    axes = fig.subplots(4, 1, sharex=True)
     for ch, ax in enumerate(axes):
         ax.plot(t, x[:, ch], lw=0.4, color=_CHANNEL_COLOURS[ch])
         ax.set_ylabel(f"ch{ch + 1}\nµV", color=_INK)
@@ -66,7 +67,8 @@ def traces(a: Analysis) -> bytes:
 def blinks(a: Analysis) -> bytes:
     rec = a.recording
     score = blink_score(rec.exg, rec.fs)
-    fig, ax = plt.subplots(figsize=(11, 2.6))
+    fig = Figure(figsize=(11, 2.6))
+    ax = fig.subplots()
     ax.plot(rec.times, score, lw=0.6, color=_INK)
     ax.axhline(DEFAULT_PARAMS.threshold_z, color=_ACCENT, ls=":", lw=1, label="threshold")
     _mark_events(ax, a)
@@ -82,7 +84,8 @@ def spectrogram(a: Analysis) -> bytes:
     rec = a.recording
     x = clean(rec).mean(axis=1)
     ds = dynamic_spectrum(x, rec.fs, nperseg=256).band(1, 40)
-    fig, ax = plt.subplots(figsize=(11, 3.2))
+    fig = Figure(figsize=(11, 3.2))
+    ax = fig.subplots()
     db = 10 * np.log10(ds.power.T + 1e-12)
     lo, hi = np.percentile(db, [2, 99.5])
     mesh = ax.pcolormesh(

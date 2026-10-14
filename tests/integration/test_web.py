@@ -2,12 +2,16 @@
 # Copyright (C) 2026 Marcel Petrick <mail@marcelpetrick.it>
 """HTTP-level tests of the dashboard (FastAPI TestClient)."""
 
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
 
+from ntxbci.manifest import load_manifest
 from ntxbci.web import create_app
+from ntxbci.web.analysis import Analyzer
+from ntxbci.web.plots import RENDERERS
 
 PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
 
@@ -96,3 +100,14 @@ def test_real_dashboard(real_root: Path) -> None:
     }
     assert rows["blink-test"]["blinks"] == 10
     assert all(r["replay_passed"] for r in rows.values())
+
+
+def test_plots_render_identically_under_concurrency(mini_dataset: Path) -> None:
+    """Regression: plots must not share pyplot state across threadpool workers."""
+    analysis = Analyzer(load_manifest(mini_dataset)).get("blink")
+    serial = {kind: render(analysis) for kind, render in RENDERERS.items()}
+    jobs = [kind for kind in RENDERERS for _ in range(4)]
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        results = list(pool.map(lambda kind: (kind, RENDERERS[kind](analysis)), jobs))
+    for kind, png in results:
+        assert png == serial[kind], kind
