@@ -1,6 +1,6 @@
 [project]
 name = "ntxbci"
-version = "0.8.8"
+version = "0.8.9"
 description = "Cleaned-up NTX Hackathon 2022 BCI toolkit: OpenBCI Ganglion recordings, blink detection, epoching, web dashboard and a blink-controlled Pacman."
 readme = "README.md"
 license = "GPL-3.0-or-later"
