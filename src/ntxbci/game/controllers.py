@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import math
 from collections.abc import Sequence
 from typing import Protocol
 
@@ -19,20 +20,23 @@ class Controller(Protocol):
 class ScriptedController:
     """Emit ``REVERSE`` once at each given time - used to replay blink detections.
 
-    A blink at ``t`` triggers on the first tick whose start is ``>= t``, i.e. with at most
-    one tick (100 ms) of added latency, like a live detector would.
+    A blink at ``t`` triggers on tick :func:`tick_of` ``(t)``, the first tick whose start is
+    ``>= t``, i.e. with at most one tick (100 ms) of added latency, like a live detector.
+    Firing is decided on tick indices, never on raw float seconds, so the replay check and
+    the controller can never disagree about a blink that lies exactly on a tick boundary.
     """
 
     def __init__(self, reverse_at_s: Sequence[float]) -> None:
         self._pending = sorted(reverse_at_s)
 
     def command(self, time_s: float) -> Command:
-        if self._pending and self._pending[0] <= time_s + 1e-9:
-            # several blinks inside one tick collapse into a single reverse
-            while self._pending and self._pending[0] <= time_s + 1e-9:
-                self._pending.pop(0)
-            return Command.REVERSE
-        return Command.NONE
+        tick = tick_of(time_s)
+        fired = False
+        # several blinks inside one tick collapse into a single reverse
+        while self._pending and tick_of(self._pending[0]) <= tick:
+            self._pending.pop(0)
+            fired = True
+        return Command.REVERSE if fired else Command.NONE
 
     @property
     def remaining(self) -> int:
@@ -54,5 +58,9 @@ class KeyboardController:
 
 
 def tick_of(time_s: float) -> int:
-    """Index of the tick in which a command issued at ``time_s`` takes effect."""
-    return int(-(-round(time_s, 9) // TICK_S))
+    """Index of the first tick starting at or after ``time_s`` (``ceil(time_s / TICK_S)``).
+
+    The quotient is rounded first so float noise (``1.1 / 0.1 == 11.000000000000002``)
+    cannot push an on-boundary time into the next tick.
+    """
+    return math.ceil(round(time_s / TICK_S, 6))

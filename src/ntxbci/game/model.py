@@ -132,7 +132,8 @@ class GameState:
     def step(self, dt: float = TICK_S) -> None:
         if self.status is not Status.RUNNING:
             return
-        self.time_s += dt
+        # rounded so the clock does not drift away from tick multiples (0.1 is inexact)
+        self.time_s = round(self.time_s + dt, 9)
         self.fright_left_s = max(0.0, self.fright_left_s - dt)
         self.grace_left_s = max(0.0, self.grace_left_s - dt)
         self._move_hero(dt)
