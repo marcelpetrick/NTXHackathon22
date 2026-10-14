@@ -6,6 +6,7 @@
     "Reconstructed on 2026-10-14 from file contents and timestamps; the team's Google Doc with the protocol is gone (HTTP 410).",
     "No recording contains event markers: the BrainFlow marker channel (column 14) is all zero; the non-zero aux columns 5-7 are the accelerometer.",
     "Impedance values are electrode + driven ground in kOhm; the OpenBCI GUI shows half of it per electrode.",
+    "The raw sessions carry strong 50 Hz mains interference (~10^4 x the 40-60 Hz neighbourhood); always notch before analysis (ntxbci.processing.clean does).",
     "stimulus_order.txt lists 14 binary stimuli without timing; which session(s) it belongs to and what 0/1 mean is unknown.",
     "Each BrainFlow-RAW_session<N>_1.csv in sessions 2-4 is an impedance check taken right BEFORE session N+1, i.e. misfiled one folder early.",
     "Afternoon test runs (14:06-16:10) were removed in commit f1374da; their channel std was 5-14 mV (bad contact). Recover with: git show f1374da^:<path>."
