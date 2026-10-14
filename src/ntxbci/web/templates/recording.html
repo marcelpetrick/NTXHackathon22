@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}{{ a.entry.id }} · NTX BCI{% endblock %}
+{% block content %}
+<section class="intro">
+  <p class="crumbs"><a href="/">Recordings</a> / {{ a.entry.id }}</p>
+  <h1>{{ a.entry.id }} <span class="kind {{ a.entry.kind }}">{{ a.entry.kind.replace('_', ' ') }}</span></h1>
+  <p>{{ a.entry.notes }}</p>
+  <dl class="facts">
+    <div><dt>Start</dt><dd>{{ a.entry.start.strftime('%Y-%m-%d %H:%M:%S') }}</dd></div>
+    <div><dt>Duration</dt><dd>{{ '%.2f'|format(a.recording.duration) }} s</dd></div>
+    <div><dt>Samples</dt><dd>{{ a.recording.n_samples }}</dd></div>
+    <div><dt>Event markers</dt><dd>{{ 'yes' if a.recording.has_markers else 'none' }}</dd></div>
+    <div><dt>File</dt><dd><code>{{ a.entry.path }}</code></dd></div>
+  </dl>
+</section>
+
+<section class="grid">
+  <div class="card">
+    <h2>Channel quality</h2>
+    <table>
+      <thead><tr><th>Ch</th><th>Status</th><th>Std <span class="unit">µV</span></th><th>Artefacts</th><th>50 Hz ratio</th></tr></thead>
+      <tbody>{% for c in a.quality %}
+        <tr><td>{{ c.channel + 1 }}</td><td><span class="pill {{ c.status }}">{{ c.status }}</span></td>
+          <td>{{ '%.1f'|format(c.std_uv) }}</td><td>{{ '%.1f'|format(100 * c.artefact_fraction) }} %</td>
+          <td>{{ '%.0f'|format(c.line_noise_ratio) }}×</td></tr>
+      {% endfor %}</tbody>
+    </table>
+    {% if a.impedance %}
+    <h2>Impedance before this session</h2>
+    <p class="muted">Per electrode in kΩ (OpenBCI GUI convention: raw / 2)</p>
+    <div class="labels">{% for k, v in a.impedance.values.items() %}
+      <span class="imp">{{ k }} <b>{{ '%.1f'|format(electrode_impedance(v)) }}</b></span>{% endfor %}</div>
+    {% endif %}
+  </div>
+  <div class="card">
+    <h2>Replay check</h2>
+    <p><span class="pill {{ 'good' if a.replay.passed else 'bad' }}">{{ 'PASS' if a.replay.passed else 'FAIL' }}</span>
+       {{ a.blinks|length }} blink(s) → Pacman</p>
+    {% if a.replay.detection %}{% set d = a.replay.detection %}
+    <p>Detection vs. protocol: {{ d.detected }}/{{ d.expected }}, F1 {{ '%.2f'|format(d.f1) }},
+       latency {{ '%+.2f'|format(d.mean_latency_s) }} s</p>
+    {% endif %}
+    {% set g = a.replay.game %}
+    <p>Game: <b>{{ g.status }}</b>, score {{ g.score }}, lives {{ g.lives }}, {{ g.turns }} turns,
+       {{ '%.1f'|format(g.duration_s) }} s</p>
+    {% for p in a.replay.problems %}<p class="check bad">{{ p }}</p>{% endfor %}
+    <p class="muted">Blink times: {{ a.blinks|map(attribute='time_s')|map('round', 2)|join(', ') or '—' }}</p>
+  </div>
+</section>
+
+{% for p in plots %}
+<figure class="plot"><img src="/plots/{{ a.entry.id }}/{{ p }}.png" alt="{{ p }} of {{ a.entry.id }}" loading="lazy"></figure>
+{% endfor %}
+{% endblock %}

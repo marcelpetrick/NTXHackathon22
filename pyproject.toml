@@ -1,6 +1,6 @@
 [project]
 name = "ntxbci"
-version = "0.6.0"
+version = "0.7.0"
 description = "Cleaned-up NTX Hackathon 2022 BCI toolkit: OpenBCI Ganglion recordings, blink detection, epoching, web dashboard and a blink-controlled Pacman."
 readme = "README.md"
 license = "GPL-3.0-or-later"
@@ -8,8 +8,12 @@ license-files = ["LICENSE", "LICENSES/*"]
 authors = [{ name = "Marcel Petrick", email = "mail@marcelpetrick.it" }]
 requires-python = ">=3.14"
 dependencies = [
+    "fastapi>=0.118",
+    "jinja2>=3.1",
+    "matplotlib>=3.10",
     "numpy>=2.3",
     "scipy>=1.16",
+    "uvicorn>=0.37",
 ]
 
 [project.scripts]
@@ -22,7 +26,10 @@ game = [
 
 [dependency-groups]
 dev = [
+    "httpx>=0.28",
+    "httpx2>=2.13.1",
     "mypy>=1.18",
+    "playwright>=1.55",
     "pytest>=8.4",
     "pytest-cov>=7.0",
     "ruff>=0.14",

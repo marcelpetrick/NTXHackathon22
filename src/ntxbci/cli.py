@@ -235,6 +235,15 @@ def cmd_play(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_serve(args: argparse.Namespace) -> int:  # pragma: no cover - blocking server
+    import uvicorn  # noqa: PLC0415
+
+    from ntxbci.web import create_app  # noqa: PLC0415
+
+    uvicorn.run(create_app(args.data), host=args.host, port=args.port)
+    return 0
+
+
 def _game_args(p: argparse.ArgumentParser) -> None:
     p.add_argument("--speed", type=float, default=1.0, help="real-time speed factor")
     p.add_argument("--headless", action="store_true", help="no window, not real time")
@@ -251,7 +260,13 @@ def build_parser() -> argparse.ArgumentParser:
         help="recordings folder (default: $NTXBCI_DATA or ./Recordings)",
     )
     sub = parser.add_subparsers(dest="command", required=True)
+    _add_data_commands(sub)
+    _add_analysis_commands(sub)
+    _add_game_and_web_commands(sub)
+    return parser
 
+
+def _add_data_commands(sub: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     p = sub.add_parser("inventory", help="list recordings and verify the manifest")
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_inventory)
@@ -267,6 +282,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_blinks)
 
+
+def _add_analysis_commands(sub: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     p = sub.add_parser("epochs", help="export labelled epochs (.npz) under a timing hypothesis")
     p.add_argument("id")
     p.add_argument("--onset", type=float, default=0.0, help="first trial onset [s]")
@@ -291,6 +308,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--out", required=True)
     p.set_defaults(func=cmd_spectrum)
 
+
+def _add_game_and_web_commands(sub: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     p = sub.add_parser("replay", help="recording -> blink detector -> game check")
     p.add_argument("id")
     p.add_argument("--threshold", type=float, default=BlinkParams().threshold_z)
@@ -305,7 +324,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--seconds", type=float, default=120.0, help="survive this long to win")
     p.set_defaults(func=cmd_play)
 
-    return parser
+    p = sub.add_parser("serve", help="start the web dashboard")
+    p.add_argument("--host", default="127.0.0.1")
+    p.add_argument("--port", type=int, default=8000)
+    p.set_defaults(func=cmd_serve)
 
 
 def main(argv: Sequence[str] | None = None) -> int:

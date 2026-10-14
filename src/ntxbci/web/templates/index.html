@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="intro">
+  <h1>What did we record?</h1>
+  <p>Raw EEG from the NTX Hackathon 2022 (29/30 Oct), reconstructed from file contents and
+     timestamps. The team's protocol document is gone, so every finding below is derived
+     from the data itself.</p>
+  <p class="check {{ 'ok' if not problems else 'bad' }}">
+    Manifest check: {{ 'all files verified' if not problems else problems|length ~ ' problem(s)' }}
+  </p>
+</section>
+
+<section>
+  <h2>Recordings</h2>
+  <table class="recordings">
+    <thead><tr><th>Recording</th><th>Kind</th><th>Start</th><th>Duration</th>
+      <th>Quality</th><th>Blinks</th><th>Replay</th></tr></thead>
+    <tbody>
+    {% for a in rows %}
+      <tr>
+        <td><a href="/recordings/{{ a.entry.id }}">{{ a.entry.id }}</a></td>
+        <td><span class="kind {{ a.entry.kind }}">{{ a.entry.kind.replace('_', ' ') }}</span></td>
+        <td>{{ a.entry.start.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+        <td>{{ '%.1f'|format(a.recording.duration) }} s</td>
+        <td><span class="pill {{ a.overall }}">{{ a.overall }}</span></td>
+        <td>{{ a.blinks|length }}</td>
+        <td><span class="pill {{ 'good' if a.replay.passed else 'bad' }}">{{ 'pass' if a.replay.passed else 'fail' }}</span>
+            {% if a.replay.detection %}<small>F1 {{ '%.2f'|format(a.replay.detection.f1) }}</small>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="grid">
+  <div class="card">
+    <h2>Findings</h2>
+    <ul>{% for note in manifest.notes %}<li>{{ note }}</li>{% endfor %}</ul>
+  </div>
+  <div class="card">
+    <h2>Stimulus order</h2>
+    <div class="labels">{% for l in labels %}<span class="lab l{{ l }}">{{ l }}</span>{% endfor %}</div>
+    <p class="muted">{{ labels|length }} trials, meaning of 0/1 and timing unknown.</p>
+    <h2>Impedance checks</h2>
+    <ul>{% for e in impedances %}<li><b>{{ e.id }}</b> — {{ e.notes }}</li>{% endfor %}</ul>
+  </div>
+</section>
+{% endblock %}

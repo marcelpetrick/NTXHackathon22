@@ -14,4 +14,5 @@ and a usage line; `scripts/check_script_docs.sh` enforces that each one is liste
 | `wheel_smoke.sh` | Install the wheel into a temp venv and check `ntxbci --version`. |
 | `run_e2e.sh` | Run `pytest -m e2e` (installs Playwright Chromium when needed). |
 | `docker_build.sh` | Build `ntxbci:local` and `ntxbci:<version>`. |
+| `screenshots.py` | Regenerate the README screenshots (dashboard, blink-test page, game replay) from the running app: `uv run python scripts/screenshots.py`. |
 | `docker_smoke.sh` | Run the image, probe `/healthz`, `/api/recordings` and `/`. |

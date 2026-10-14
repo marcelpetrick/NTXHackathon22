@@ -75,4 +75,9 @@ class Renderer:
         if state.status is not Status.RUNNING:
             msg = "You won!" if state.status is Status.WON else "Game over"
             text = self.big_font.render(msg, True, WHITE)
-            s.blit(text, text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 10)))
+            box = text.get_rect(center=(WIDTH // 2, TOP_PX + (HEIGHT - TOP_PX) // 2))
+            backdrop = pygame.Surface(box.inflate(24, 10).size, pygame.SRCALPHA)
+            backdrop.fill((0, 0, 0, 190))
+            s.blit(backdrop, box.inflate(24, 10))
+            pygame.draw.rect(s, SKYBLUE, box.inflate(24, 10), 2)
+            s.blit(text, box)

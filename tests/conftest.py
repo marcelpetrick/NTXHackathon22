@@ -1,18 +1,25 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Marcel Petrick <mail@marcelpetrick.it>
-"""Shared fixtures: synthetic Ganglion files in all three on-disk formats."""
+"""Shared fixtures: synthetic Ganglion files in all three on-disk formats, real data, and a
+live dashboard server for the e2e tests."""
 
 from __future__ import annotations
 
 import json
-from collections.abc import Callable
+import socket
+import threading
+import time
+from collections.abc import Callable, Iterator
 from pathlib import Path
 
+import httpx
 import numpy as np
 import pytest
+import uvicorn
 from numpy.typing import NDArray
 
 from ntxbci.manifest import default_data_root
+from ntxbci.web import create_app
 
 FS = 200.0
 T0 = 1667068518.8  # 2022-10-29T20:35:18.800+02:00
@@ -142,3 +149,28 @@ def real_root() -> Path:
     if not (root / "manifest.json").is_file():  # pragma: no cover - data ships with the repo
         pytest.skip("real recordings not available")
     return root
+
+
+def _free_port() -> int:
+    with socket.socket() as s:
+        s.bind(("127.0.0.1", 0))
+        return int(s.getsockname()[1])
+
+
+@pytest.fixture(scope="session")
+def server_url(real_root: Path) -> Iterator[str]:
+    port = _free_port()
+    config = uvicorn.Config(create_app(real_root), host="127.0.0.1", port=port, log_level="warning")
+    server = uvicorn.Server(config)
+    thread = threading.Thread(target=server.run, daemon=True)
+    thread.start()
+    url = f"http://127.0.0.1:{port}"
+    for _ in range(100):
+        try:
+            if httpx.get(f"{url}/healthz").status_code == 200:
+                break
+        except httpx.TransportError:
+            time.sleep(0.1)
+    yield url
+    server.should_exit = True
+    thread.join(timeout=10)
