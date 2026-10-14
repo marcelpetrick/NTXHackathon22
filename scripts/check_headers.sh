@@ -14,5 +14,5 @@ while IFS= read -r f; do
         echo "missing SPDX header: $f"
         missing=1
     fi
-done < <(git ls-files --cached --others --exclude-standard -- '*.py' '*.sh' 'Dockerfile' ':!pacman')
+done < <(git ls-files --cached --others --exclude-standard -- '*.py' '*.sh' 'Dockerfile')
 exit "$missing"

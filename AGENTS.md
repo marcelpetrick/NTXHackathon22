@@ -20,7 +20,7 @@ The README links a Google Doc with the team notes; as of 2026-10 it returns
 
 | Path | Content |
 |---|---|
-| `pacman/` | Pygame Pacman (third-party original, commit `417418c`), reduced to a single-row level 606×86 px (`f374c4a`). Keyboard only, no BCI input. |
+| `src/ntxbci/game/` | One-row Pacman rewritten from the hackathon's modified CharlesPikachu/Games `Game14` (see `assets/NOTICE.md`): pure rules in `model.py`, pygame in `render.py`/`app.py`, keyboard + scripted (blink replay) controllers. The legacy `pacman/` folder was removed. |
 | `Recordings/` | All raw recordings (unmodified): evening EEG sessions 2–5, `stimulus_order.txt`, and `BlinkTest_2022-10-30/` (the only labelled recording). The former `data/` tree was a byte-identical duplicate and was removed. |
 | `get_dynamic_spectrum.ipynb` | Multitaper dynamic spectrum + AR whitening. Loads `ws_data_1shank.mat` (16-ch hippocampal LFP @1250 Hz) — workshop sample data, **not in the repo and not our EEG**. Never applied to the Ganglion data. |
 
@@ -61,12 +61,9 @@ classifier as-is. Any analysis must state its assumed trial timing explicitly.
 No dependency manifest exists. Inferred: Python 3.8, `pygame` (game),
 `numpy scipy matplotlib` (notebook/analysis).
 
-- `pacman/pacman.py` hard-codes `os.chdir("/Users/thomasmullen/…/pacman")` (from
-  `0453637`); remove/replace it or run from `pacman/` with that line patched.
-- Arrow keys move; ENTER restarts, ESC quits.
+- Game: arrow keys / SPACE (reverse), ESC quits. Headless with `SDL_VIDEODRIVER=dummy`.
 
 ## Conventions / cautions for agents
 
 - Raw recordings are the historical record: **do not modify, reformat or delete** them.
   Write derived data/scripts elsewhere.
-- Code style in `pacman/`: tabs, `'''docstring'''` comments above functions.
