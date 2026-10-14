@@ -15,4 +15,5 @@ and a usage line; `scripts/check_script_docs.sh` enforces that each one is liste
 | `run_e2e.sh` | Run `pytest -m e2e` (installs Playwright Chromium when needed). |
 | `docker_build.sh` | Build `ntxbci:local` and `ntxbci:<version>`. |
 | `screenshots.py` | Regenerate the README screenshots (dashboard, blink-test page, game replay) from the running app: `uv run python scripts/screenshots.py`. |
+| `make_video.py` | Render the two ≤ 30 s showcase clips of the blink-test replay (EEG next to the game, each blink flying from its spike to Pacman): `explainer` 16:9 real time, `fastcut` 1:1 at 2.6x. Writes `build/video/ntxbci-<cut>.mp4` (+ `.gif` with `--gif`); needs ffmpeg: `uv run python scripts/make_video.py --gif`. |
 | `docker_smoke.sh` | Run the image, probe `/healthz`, `/api/recordings` and `/`. |

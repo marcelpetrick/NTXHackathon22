@@ -59,6 +59,7 @@ uv sync --all-extras                 # setup
 scripts/commit.sh patch "type(scope): msg" -- new/file.py   # bump -> pipeline -> commit -> push
 uv run ntxbci replay blink-test      # end-to-end regression check
 uv run python scripts/screenshots.py # refresh README screenshots after UI changes
+uv run python scripts/make_video.py --gif  # showcase clips -> build/video/ (needs ffmpeg)
 ```
 
 Headless pygame: `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy` (the pipeline exports them).
